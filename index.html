@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Okla Lite - Automated MidJourney Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse {
+            animation: pulse 3s ease infinite;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        .typing-demo {
+            width: 22ch;
+            animation: typing 2s steps(22), blink .5s step-end infinite alternate;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 3px solid;
+            font-family: monospace;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+        }
+        
+        @keyframes blink {
+            50% { border-color: transparent }
+        }
+        
+        .download-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .download-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+            transition: .5s;
+        }
+        
+        .download-btn:hover::after {
+            left: 100%;
+        }
+        
+        .discord-message {
+            position: relative;
+            background: #36393f;
+            border-radius: 0 8px 8px 8px;
+            padding: 12px;
+            color: #dcddde;
+            max-width: 80%;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .discord-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -12px;
+            border-width: 0 12px 12px 0;
+            border-style: solid;
+            border-color: transparent #36393f transparent transparent;
+        }
+        
+        .discord-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #7289da;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        
+        .discord-username {
+            color: #fff;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+        
+        .discord-timestamp {
+            color: #72767d;
+            font-size: 0.75rem;
+        }
+        
+        .gallery-item {
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        
+        .progress-bar {
+            width: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5, #ec4899);
+            transition: width 1s ease;
+        }
+        
+        .download-complete .progress-bar {
+            width: 100%;
+        }
+        
+        /* Checkout modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: #1f2937;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            animation: modalFadeIn 0.3s ease-out;
+            transform: translateY(0);
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .close-modal:hover {
+            color: #fff;
+        }
+        
+        /* Price card hover effect */
+        .price-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .price-card:hover {
+            transform: translateY(-10px);
+            border-color: #7c3aed;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .price-card.popular {
+            border-color: #7c3aed;
+            position: relative;
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: #7c3aed;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            padding: 8px 12px;
+            background: #36393f;
+            border-radius: 18px;
+            width: fit-content;
+            margin-left: 56px;
+            margin-bottom: 10px;
+            opacity: 0;
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: #dcddde;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        /* Microstock section */
+        .microstock-card {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .microstock-card:hover {
+            transform: translateY(-5px);
+            border-color: #7c3aed;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+        .windows-badge {
+            background: linear-gradient(135deg, #0078D7 0%, #00A1F1 100%);
+        }
+        .system-reqs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        .req-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #d1d5db;
+        }
+        .req-icon {
+            color: #8b5cf6;
+            font-size: 1rem;
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-gray-900/90 backdrop-blur-md">
+        <div class="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Okla Lite</span>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#features" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition">Features</a>
+                        <a href="#pricing" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition">Pricing</a>
+                        <a href="#gallery" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition">Gallery</a>
+                        <a href="#microstock" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition">Sell AI Art</a>
+                        <a href="#demo" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition">Demo</a>
+                        <a href="#download" class="px-3 py-2 rounded-md text-sm font-medium bg-purple-600 hover:bg-purple-700 transition">Download</a>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg min-h-screen flex items-center justify-center pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <h1 class="text-5xl md:text-6xl font-bold leading-tight">
+                        Automate Your <span class="bg-gradient-to-r from-yellow-300 to-pink-500 bg-clip-text text-transparent">MidJourney</span> Workflow
+                    </h1>
+                    <p class="text-xl text-gray-200">
+                        Okla Lite is a lightweight automation tool designed for AI microstockers. It sends thousands of prompts to MidJourney via Discord, downloads images, and tracks Verification - automatically and in the background. Perfect for high-volume content creators who want to streamline their workflow and save time.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#download" class="download-btn px-8 py-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-bold text-lg transition-all duration-300 flex items-center gap-2">
+                            <i class="fas fa-download"></i> Download Now
+                        </a>
+                        <a href="#demo" class="px-8 py-4 bg-gray-800 hover:bg-gray-700 rounded-lg font-bold text-lg transition flex items-center gap-2">
+                            <i class="fas fa-play"></i> Watch Demo
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-4 text-gray-300">
+                        <div class="flex -space-x-2">
+                            <img class="w-10 h-10 rounded-full border-2 border-gray-800" src="https://randomuser.me/api/portraits/women/12.jpg" alt="">
+                            <img class="w-10 h-10 rounded-full border-2 border-gray-800" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                            <img class="w-10 h-10 rounded-full border-2 border-gray-800" src="https://randomuser.me/api/portraits/women/45.jpg" alt="">
+                        </div>
+                        <div>
+                            <p>Join <span class="text-white font-medium">5,000+</span> creators</p>
+                            <div class="flex items-center gap-1 text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <span class="text-gray-300 ml-1">4.8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="floating">
+                        <div class="relative bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-gray-700">
+                            <div class="bg-gray-900 p-3 flex items-center">
+                                <div class="flex space-x-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                </div>
+                                <div class="text-center flex-grow text-sm font-medium">Okla Lite</div>
+                            </div>
+                            <div class="p-4">
+                                <div class="bg-gray-900 rounded-lg p-4 h-96 overflow-y-auto" id="chatContainer">
+                                    <!-- Chat messages will be added dynamically by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 w-32 h-32 rounded-full bg-purple-500/20 blur-3xl"></div>
+                    <div class="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-pink-500/20 blur-3xl"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Superior Features</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Okla Lite is packed with powerful features to supercharge your MidJourney workflow</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300 hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-lg bg-purple-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-bolt text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Auto Prompt Sending</h3>
+                    <p class="text-gray-400">Automatically send thousands of prompts to MidJourney without manual intervention. Queue up your prompts and let Okla Lite handle the rest.</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300 hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-lg bg-blue-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-cloud-download-alt text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Auto Image Download</h3>
+                    <p class="text-gray-400">Automatically downloads all generated images to your specified folder. Never lose track of your creations again.</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300 hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-lg bg-green-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Prompt Tracking</h3>
+                    <p class="text-gray-400">Comprehensive tracking of all your prompts, including generation time, status, and results. Know exactly what's happening at all times.</p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300 hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-lg bg-yellow-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-user-check text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Human Verification</h3>
+                    <p class="text-gray-400">Smart detection of human verification requests. Get notified when MidJourney requires your input to continue.</p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300 hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-lg bg-pink-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-layer-group text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Batch Processing</h3>
+                    <p class="text-gray-400">Process multiple prompts in batches with customizable delays. Perfect for large-scale projects and variations.</p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300 hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-lg bg-indigo-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-desktop text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Background Operation</h3>
+                    <p class="text-gray-400">Runs quietly in the background while you work on other tasks. Minimal system resource usage.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Plans for you!</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Choose the plan that fits your creative workflow</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Monthly Plan -->
+                <div class="price-card bg-gray-900 rounded-xl p-8 relative">
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold mb-2">Monthly</h3>
+                        <p class="text-gray-400">Flexible monthly subscription</p>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex items-end">
+                            <span class="text-5xl font-bold">Rp80,000</span>
+                            <span class="text-gray-400 ml-2 line-through">Rp99,000</span>
+                        </div>
+                        <p class="text-gray-400 mt-2">per month</p>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>All features included</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Priority support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Regular updates</span>
+                        </li>
+                    </ul>
+                    <button onclick="openModal('Monthly - Rp80,000/month')" class="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition">
+                        Choose Plan
+                    </button>
+                </div>
+                
+                <!-- Yearly Plan (Popular) -->
+                <div class="price-card bg-gray-900 rounded-xl p-8 relative popular">
+                    <div class="popular-badge">Most Popular</div>
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold mb-2">Yearly</h3>
+                        <p class="text-gray-400">Best value - 50% discount</p>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex items-end">
+                            <span class="text-5xl font-bold">Rp450,000</span>
+                            <span class="text-gray-400 ml-2 line-through">Rp900,000</span>
+                        </div>
+                        <p class="text-gray-400 mt-2">per year (Rp37,500/month)</p>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>All features included</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Priority support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Regular updates</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Exclusive beta features</span>
+                        </li>
+                    </ul>
+                    <button onclick="openModal('Yearly - Rp450,000/year')" class="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition">
+                        Choose Plan
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12 text-gray-400">
+                <p>All plans come with a 7-day money-back guarantee. Need help choosing? <a href="#" class="text-purple-400 hover:text-purple-300">Contact our team</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Microstock Section -->
+    <section id="microstock" class="py-20 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Sell Your AI Art</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Monetize your MidJourney creations on popular microstock platforms</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Freepik -->
+                <div class="microstock-card bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition-all">
+                    <div class="flex items-center justify-center mb-6">
+                        <img src="https://static-contributor-fp.cdnpk.net/assets/60327fc60ab6ef47e82c.svg" alt="Freepik" class="h-12">
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Freepik Contributor</h3>
+                    <p class="text-gray-400 mb-4">One of the largest stock photo platforms that accepts AI-generated content with proper labeling.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-purple-400 font-medium">Earnings: 15-40%</span>
+                        <a href="#" class="text-sm bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition">Learn More</a>
+                    </div>
+                </div>
+                
+                <!-- Adobe Stock -->
+                <div class="microstock-card bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition-all">
+                    <div class="flex items-center justify-center mb-6">
+                        <img src="https://contributor.stock.adobe.com/static/images/copied/stock_logo_redesigned.svg" alt="Adobe Stock" class="h-12">
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Adobe Stock Contributor</h3>
+                    <p class="text-gray-400 mb-4">Recomended Microstock. Premium marketplace with high demand for AI art. Requires disclosure of AI generation.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-purple-400 font-medium">Earnings: 33%</span>
+                        <a href="#" class="text-sm bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition">Learn More</a>
+                    </div>
+                </div>
+                
+                <!-- Dreamstime -->
+                <div class="microstock-card bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition-all">
+                    <div class="flex items-center justify-center mb-6">
+                        <img src="https://logodix.com/logo/1773350.png" alt="Dreamstime" class="h-12">
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Dreamstime Contributor</h3>
+                    <p class="text-gray-400 mb-4">Accepts AI-generated images with clear labeling. Offers exclusive and non-exclusive options.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-purple-400 font-medium">Earnings: 25-60%</span>
+                        <a href="#" class="text-sm bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 bg-gray-800 rounded-xl p-8">
+                <h3 class="text-2xl font-bold mb-4">Tips for Selling AI Art</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                            <i class="fas fa-check text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-1">Edit Before Uploading</h4>
+                            <p class="text-gray-400">Use Photoshop or other tools to enhance your AI images before submitting to microstock sites.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                            <i class="fas fa-check text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-1">Keyword Strategically</h4>
+                            <p class="text-gray-400">Use relevant keywords and descriptions to help buyers find your AI-generated content.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                            <i class="fas fa-check text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-1">Create Series</h4>
+                            <p class="text-gray-400">Upload themed collections of images (like different angles or variations) to increase sales potential.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                            <i class="fas fa-check text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-1">Check Guidelines</h4>
+                            <p class="text-gray-400">Each platform has different rules about AI content - always review their latest policies.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-20 bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">MidJourney Results</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">See what our users have created with Okla Lite</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Gallery Item 1 -->
+                <div class="gallery-item rounded-xl overflow-hidden relative group">
+                    <img src="https://cdn.midjourney.com/bf0b815f-2540-4987-bcd8-9c496e3a90a9/0_3.jpeg" alt="MidJourney Art" class="w-full h-64 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                        <div>
+                            <p class="font-medium">Prompt:</p>
+                            <p class="text-sm">"3D mascote cute, 3D blander mascote. 8k. cute A curious seahorse gliding slowly through the water, its delicate body swaying gently with the current --ar 16:9"</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gallery Item 2 -->
+                <div class="gallery-item rounded-xl overflow-hidden relative group">
+                    <img src="https://cdn.midjourney.com/06ac9b55-498e-46b6-b0f6-eedd7fbd694b/0_0.jpeg" alt="MidJourney Art" class="w-full h-64 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                        <div>
+                            <p class="font-medium">Prompt:</p>
+                            <p class="text-sm">"3D mascote cute, 3D blander mascote. 8k. cute A calm and peaceful jellyfish drifting through the clear blue water, its long tentacles flowing gracefully behind it --c 50 --ar 16:9 --s 750 --v 7"</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gallery Item 3 -->
+                <div class="gallery-item rounded-xl overflow-hidden relative group">
+                    <img src="https://cdn.midjourney.com/b6849237-a9f1-4d03-8092-bbaef7a81194/0_0.jpeg" alt="MidJourney Art" class="w-full h-64 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                        <div>
+                            <p class="font-medium">Prompt:</p>
+                            <p class="text-sm">"realistic, hight qualiti, 8k, A 3D rabbit dressed as a police officer, with a badge and hat, standing proudly against a soft blue background --c 30 --ar 16:9 --s 250 --v 6.1"</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gallery Item 4 -->
+                <div class="gallery-item rounded-xl overflow-hidden relative group">
+                    <img src="https://cdn.midjourney.com/6cca7e45-c454-4c2e-acd0-5aa529b0f242/0_3.jpeg" alt="MidJourney Art" class="w-full h-64 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                        <div>
+                            <p class="font-medium">Prompt:</p>
+                            <p class="text-sm">"A smiling sadhu in an orange turban, captured in a portrait surrounded by the vivid colors of an Indian street market, with traditional items and a lively atmosphere in the background --c 30 --ar 16:9"</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gallery Item 5 -->
+                <div class="gallery-item rounded-xl overflow-hidden relative group">
+                    <img src="https://cdn.midjourney.com/f9ad82ad-0ab7-40b9-a140-d78881715474/0_0.jpeg" alt="MidJourney Art" class="w-full h-64 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                        <div>
+                            <p class="font-medium">Prompt:</p>
+                            <p class="text-sm">"A joyful young Asian woman holding oversized jeans, showcasing her weight loss success, with the jeans fitting loosely around her waist, representing a healthy lifestyle of balanced diet and fitness --c 40 --ar 16:9"</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gallery Item 6 -->
+                <div class="gallery-item rounded-xl overflow-hidden relative group">
+                    <img src="https://cdn.midjourney.com/84a59160-5451-4c0a-b22f-4223b828826c/0_1.jpeg" alt="MidJourney Art" class="w-full h-64 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                        <div>
+                            <p class="font-medium">Prompt:</p>
+                            <p class="text-sm">"3D mascote cute, 3D blander mascote. 8k. cute A koala wearing glasses, curled up in the crook of a tree, sleeping soundly --c 30 --ar 16:9 --s 250 --v 6.1"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="#" class="inline-block px-8 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition">
+                    View More Creations
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Video Section -->
+    <section id="demo" class="py-20 bg-gray-900">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">See Okla Lite in Action</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Watch how easy it is to automate your MidJourney workflow</p>
+            </div>
+            
+            <div class="relative rounded-2xl overflow-hidden shadow-2xl max-w-4xl mx-auto">
+                <div class="aspect-w-16 aspect-h-9">
+                    <iframe class="w-full h-96" src="https://rr4---sn-npoe7nl6.googlevideo.com/videoplayback?expire=1744653161&ei=Cff8Z928G-fPi9oPrOfQUQ&ip=176.1.219.203&id=o-ABlctad3WiCaW4w-F9aOcuSI8Lbi-ftS65flY3FPHGR0&itag=248&aitags=133%2C134%2C135%2C136%2C137%2C160%2C242%2C243%2C244%2C247%2C248%2C271%2C278&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&bui=AccgBcO8cYP-76qnN8lLVFNy3u2o5YXMxilKJMLFrwRck01z-T5NWRX835z3lEJZuzB6CX34_G4PsD4I&spc=_S3wKgZ1PTbGnPwZu7S0M4Zl65kl62Yr_L4B3_UR7S9oQo2bTg&vprv=1&svpuc=1&mime=video%2Fwebm&ns=pfkHkJzkrxbeUAL350gsNCIQ&rqh=1&gir=yes&clen=17689814&dur=311.533&lmt=1737200803547582&keepalive=yes&fexp=24350590,24350737,24350827,24350961,24351173,24351229,24351524,24351528,24351545,24351606,24351638,51355912,51435733&c=WEB&sefc=1&txp=6209224&n=Rl5sKhHTy-XeNw&sparams=expire%2Cei%2Cip%2Cid%2Caitags%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AJfQdSswRgIhANUS6g_OLF_IR6YwSP9knFCFWzH6-nAQlwV5MaNAdQz6AiEAtPCxWWOsqaNJMdfus8w83jL7Fk6hT4OWrhGvSQ0MFX0%3D&pot=MnQ2oExl-VCQfjac8swG0wIZabZ7ishHPG1-433xc49xtWmpCVcdOzyvctgoqCdys594QTz5hCoq4uX0YhvspC1lXBeVIlrYUz0wcn-q-oR3ENJaE_z9LnQBblaFsms2_ZnSnACWsu7r4dZuqq5PRV0ULyh0yw==&title=Batch%20Process%20MidJourney%20with%20Okla%20Lite%20-%20Auto%20Send%20Prompts%20&%20Download%20Images=&rm=sn-uxax4vopj5qx-q0n676,sn-4g5eys7z&rrc=79,104,80&req_id=47151e84a9dda3ee&ipbypass=yes&redirect_counter=3&cm2rm=sn-ab5esl7s&cms_redirect=yes&cmsv=e&met=1744631598,&mh=v4&mip=103.18.34.163&mm=34&mn=sn-npoe7nl6&ms=ltu&mt=1744631312&mv=m&mvi=4&pl=24&rms=ltu,au&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=ACuhMU0wRQIgXt7PPNxG7bKBWnWS1asF9xlMMcL-Gn_gJZepulHCrGACIQC30UYTRe0toWI_A_SAoIHfjkoQeze2OqyAN_JBvuEnJQ%3D%3D" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 pointer-events-none"></div>
+            </div>
+            
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-purple-500 mb-2">5,000+</div>
+                    <div class="text-gray-400">Active Users</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-pink-500 mb-2">1M+</div>
+                    <div class="text-gray-400">Images Generated</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-blue-500 mb-2">24/7</div>
+                    <div class="text-gray-400">Automation</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="py-16 bg-gray-800">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">Download Okla Lite</h2>
+                <p class="text-lg text-gray-400">Start automating your MidJourney workflow today</p>
+            </div>
+            
+            <div class="bg-gray-900 rounded-xl p-6 shadow-xl">
+                <div class="flex flex-col">
+                    <!-- Download Info -->
+                    <div class="flex flex-col md:flex-row items-center gap-6 mb-6">
+                        <div class="flex-shrink-0">
+                            <div class="w-20 h-20 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg">
+                                <i class="fas fa-download text-3xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-xl font-bold">Okla Lite for Windows</h3>
+                                <span class="windows-badge px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                    <i class="fab fa-windows text-xs"></i> Windows Only
+                                </span>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-4">Version 2.1.4 (64-bit) | 257 MB</p>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                                <button id="downloadBtn" class="download-btn w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                                <button class="w-full sm:w-auto px-4 py-3 border border-gray-600 hover:bg-gray-700 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2">
+                                    <i class="fas fa-book"></i> Docs
+                                </button>
+                            </div>
+                            
+                            <!-- Compact System Requirements -->
+                            <div class="bg-gray-800 rounded-lg p-4">
+                                <h4 class="text-sm font-semibold mb-3 text-gray-300">System Requirements:</h4>
+                                <div class="system-reqs">
+                                    <div class="req-item">
+                                        <i class="fab fa-windows req-icon"></i>
+                                        <span>Windows 10/11 64-bit</span>
+                                    </div>
+                                    <div class="req-item">
+                                        <i class="fas fa-microchip req-icon"></i>
+                                        <span>Intel Core i5+</span>
+                                    </div>
+                                    <div class="req-item">
+                                        <i class="fas fa-memory req-icon"></i>
+                                        <span>8GB RAM (Recomended)</span>
+                                    </div>
+                                    <div class="req-item">
+                                        <i class="fas fa-hdd req-icon"></i>
+                                        <span>200MB space</span>
+                                    </div>
+                                    <div class="req-item">
+                                        <i class="fab fa-discord req-icon"></i>
+                                        <span>Discord account</span>
+                                    </div>
+                                    <div class="req-item">
+                                        <i class="fas fa-code req-icon"></i>
+                                        <span>.NET 4.8+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="downloadProgress" class="mt-4 hidden">
+                                <div class="flex justify-between mb-2 text-sm">
+                                    <span>Downloading...</span>
+                                    <span id="downloadPercent">0%</span>
+                                </div>
+                                <div class="progress-bar rounded-full" id="progressBar"></div>
+                            </div>
+                            
+                            <div id="downloadComplete" class="mt-4 hidden">
+                                <div class="flex items-center gap-2 text-sm text-green-500">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Download complete! Check your downloads folder.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center text-sm text-gray-400">
+                <p>Looking for macOS or Linux version? <a href="#" class="text-purple-400 hover:underline">Join our waitlist</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rest of the HTML content remains the same -->
+
+    <script>
+        // Download functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadBtn = document.getElementById('downloadBtn');
+            const downloadProgress = document.getElementById('downloadProgress');
+            const downloadComplete = document.getElementById('downloadComplete');
+            const downloadPercent = document.getElementById('downloadPercent');
+            const progressBar = document.getElementById('progressBar');
+            
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function() {
+                    // Show progress bar
+                    downloadProgress.classList.remove('hidden');
+                    downloadComplete.classList.add('hidden');
+                    
+                    // The actual file download URL
+                    const fileUrl = 'https://pixeldrain.com/api/file/B8bGKzuD?download';
+                    
+                    // Create a hidden iframe for the download
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    document.body.appendChild(iframe);
+                    
+                    // Create XMLHttpRequest to track progress
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', fileUrl, true);
+                    xhr.responseType = 'blob';
+                    
+                    // Track progress
+                    xhr.onprogress = function(event) {
+                        if (event.lengthComputable) {
+                            const percentComplete = Math.round((event.loaded / event.total) * 100);
+                            progressBar.style.width = percentComplete + '%';
+                            downloadPercent.textContent = percentComplete + '%';
+                        }
+                    };
+                    
+                    xhr.onload = function() {
+                        if (this.status === 200) {
+                            // Create a download link
+                            const blob = this.response;
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = 'OklaLite.zip'; // Set the filename
+                            document.body.appendChild(a);
+                            a.click();
+                            
+                            // Cleanup
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                            document.body.removeChild(iframe);
+                            
+                            // Show complete message
+                            downloadProgress.classList.add('hidden');
+                            downloadComplete.classList.remove('hidden');
+                        }
+                    };
+                    
+                    xhr.onerror = function() {
+                        downloadPercent.textContent = 'Error';
+                        progressBar.style.backgroundColor = 'red';
+                        document.body.removeChild(iframe);
+                    };
+                    
+                    // Start the download
+                    xhr.send();
+                    
+                    // Also trigger the iframe download as a fallback
+                    iframe.src = fileUrl;
+                });
+            }
+            
+            // Rest of your existing JavaScript code...
+        });
+    </script>
+
+    <!-- Testimonials -->
+    <section class="py-20 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">What Our Users Say</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Join thousands of satisfied creators who've supercharged their workflow</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-gray-800 rounded-xl p-8">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="w-12 h-12 rounded-full">
+                        <div>
+                            <div class="font-bold">Sarah Johnson</div>
+                            <div class="text-gray-400 text-sm">Digital Artist</div>
+                        </div>
+                    </div>
+                    <div class="text-gray-300 mb-4">
+                        "Okla Lite has completely transformed my workflow. I can now generate hundreds of variations overnight and wake up to a folder full of amazing images ready for my next project."
+                    </div>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-gray-800 rounded-xl p-8">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="w-12 h-12 rounded-full">
+                        <div>
+                            <div class="font-bold">Michael Chen</div>
+                            <div class="text-gray-400 text-sm">Game Developer</div>
+                        </div>
+                    </div>
+                    <div class="text-gray-300 mb-4">
+                        "The batch processing feature is a game-changer for generating consistent assets. I've cut my concept art production time by 80% while increasing quality and variety."
+                    </div>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-gray-800 rounded-xl p-8">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User" class="w-12 h-12 rounded-full">
+                        <div>
+                            <div class="font-bold">Emma Rodriguez</div>
+                            <div class="text-gray-400 text-sm">Creative Director</div>
+                        </div>
+                    </div>
+                    <div class="text-gray-300 mb-4">
+                        "As someone managing multiple artists, Okla Lite's tracking system helps me monitor progress across all our MidJourney projects in real-time. The auto-download keeps everything organized."
+                    </div>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-bold mb-6">Ready to Supercharge Your MidJourney Workflow?</h2>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">Download Okla Lite today and start creating more with less effort.</p>
+            <a href="#download" class="download-btn inline-block px-8 py-4 bg-white hover:bg-gray-100 text-gray-900 rounded-lg font-bold text-lg transition-all duration-300">
+                <i class="fas fa-download mr-2"></i> Download Now
+            </a>
+        </div>
+    </section>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 class="text-2xl font-bold mb-6">Complete Your Purchase</h2>
+            <p class="text-gray-400 mb-6" id="selectedPlanText">Selected Plan: Monthly - Rp80,000/month</p>
+            
+            <form id="checkoutForm" class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium mb-1">Full Name</label>
+                    <input type="text" id="name" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium mb-1">Email Address</label>
+                    <input type="email" id="email" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label for="discord" class="block text-sm font-medium mb-1">Discord Username</label>
+                    <input type="text" id="discord" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="username#1234">
+                </div>
+                
+                <div>
+                    <label for="payment" class="block text-sm font-medium mb-1">Payment Method</label>
+                    <select id="payment" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                        <option value="">Select payment method</option>
+                        <option value="bank">Bank Transfer (Indonesia)</option>
+                        <option value="credit">Credit/Debit Card</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="crypto">Cryptocurrency</option>
+                    </select>
+                </div>
+                
+                <div class="pt-4">
+                    <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition">
+                        Complete Purchase
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-12">
+        <div class="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Okla Lite</h3>
+                    <p class="text-gray-400">The ultimate automation tool for MidJourney creators.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-medium mb-4">Product</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition">Features</a></li>
+                        <li><a href="#pricing" class="text-gray-400 hover:text-white transition">Pricing</a></li>
+                        <li><a href="#gallery" class="text-gray-400 hover:text-white transition">Gallery</a></li>
+                        <li><a href="#microstock" class="text-gray-400 hover:text-white transition">Sell AI Art</a></li>
+                        <li><a href="#demo" class="text-gray-400 hover:text-white transition">Demo</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-medium mb-4">Support</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Documentation</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Tutorials</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Community</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-medium mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400">© 2025 Okla Lite. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Chat animation
+        function createChatMessage(avatar, username, message, delay, isTyping = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            
+            if (isTyping) {
+                // Create typing indicator
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'typing-indicator';
+                typingDiv.innerHTML = `
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                `;
+                chatContainer.appendChild(typingDiv);
+                
+                // Animate typing indicator
+                setTimeout(() => {
+                    typingDiv.style.animation = 'fadeIn 0.3s forwards';
+                }, delay);
+                
+                return typingDiv;
+            }
+            
+            // Create message container
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex mb-4';
+            
+            // Create avatar
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'discord-avatar';
+            avatarDiv.innerHTML = `<i class="fas ${avatar} text-white"></i>`;
+            
+            // Create message content
+            const contentDiv = document.createElement('div');
+            contentDiv.innerHTML = `
+                <div class="flex items-baseline">
+                    <span class="discord-username">${username}</span>
+                    <span class="discord-timestamp">Today at ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+                <div class="discord-message">${message}</div>
+            `;
+            
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            // Animate message
+            setTimeout(() => {
+                const messageElement = messageDiv.querySelector('.discord-message');
+                messageElement.style.animation = 'fadeIn 0.5s forwards';
+            }, delay);
+            
+            return messageDiv;
+        }
+
+        // Initialize chat animation
+        function initChatAnimation() {
+            // Clear chat container
+            document.getElementById('chatContainer').innerHTML = '';
+            
+            // Sequence of chat messages with delays
+            const chatSequence = [
+                { type: 'message', avatar: 'fa-robot', username: 'Okla Bot', message: 'Ready to automate your MidJourney workflow!', delay: 500 },
+                { type: 'typing', delay: 1000 },
+                { type: 'message', avatar: 'fa-user', username: 'You', message: '/imagine prompt: cyberpunk cityscape at night, neon lights, rain, 8k --v 5', delay: 2000 },
+                { type: 'typing', delay: 3500 },
+                { type: 'message', avatar: 'fa-robot', username: 'Okla Bot', message: 'Prompt sent to MidJourney. Tracking progress...', delay: 4000 },
+                { type: 'typing', delay: 4500 },
+                { type: 'message', avatar: 'fa-robot', username: 'Okla Bot', message: 'Image generation complete! Downloading now...', delay:8000 },
+                { type: 'typing', delay: 9500 },
+                { type: 'message', avatar: 'fa-robot', username: 'Okla Bot', message: 'Image saved to: C:\\OklaLite\\Downloads\\cyberpunk_001.png', delay: 11000 }
+            ];
+            
+            // Create each message in sequence
+            chatSequence.forEach((item, index) => {
+                if (item.type === 'message') {
+                    createChatMessage(item.avatar, item.username, item.message, item.delay);
+                } else if (item.type === 'typing') {
+                    createChatMessage(null, null, null, item.delay, true);
+                }
+            });
+            
+            // Restart animation after it completes
+            setTimeout(initChatAnimation, 17000);
+        }
+
+        // Typing animation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Typed.js
+            if (document.querySelector('.typing-demo')) {
+                var typed = new Typed('.typing-demo', {
+                    strings: ["/imagine cyberpunk city at night --v 5", "/imagine fantasy castle in clouds --ar 16:9", "/imagine portrait of cybernetic samurai --q 2"],
+                    typeSpeed: 50,
+                    backSpeed: 30,
+                    loop: true
+                });
+            }
+            
+            // Start chat animation
+            initChatAnimation();
+            
+            // Download button animation
+            const downloadBtn = document.getElementById('downloadBtn');
+            const downloadProgress = document.getElementById('downloadProgress');
+            const downloadComplete = document.getElementById('downloadComplete');
+            const downloadPercent = document.getElementById('downloadPercent');
+            const progressBar = document.querySelector('.progress-bar');
+            
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function() {
+                    // Show progress bar
+                    downloadProgress.classList.remove('hidden');
+                    
+                    // Simulate download progress
+                    let percent = 0;
+                    const interval = setInterval(() => {
+                        percent += Math.random() * 10;
+                        if (percent >= 100) {
+                            percent = 100;
+                            clearInterval(interval);
+                            
+                            // Show complete message
+                            setTimeout(() => {
+                                downloadProgress.classList.add('hidden');
+                                downloadComplete.classList.remove('hidden');
+                            }, 500);
+                        }
+                        progressBar.style.width = percent + '%';
+                        downloadPercent.textContent = Math.round(percent) + '%';
+                    }, 200);
+                });
+            }
+            
+            // Checkout form submission
+            const checkoutForm = document.getElementById('checkoutForm');
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Thank you for your purchase! You will receive an email with payment instructions shortly.');
+                    closeModal();
+                });
+            }
+            
+            // Animate elements when they come into view
+            const animateOnScroll = function() {
+                const elements = document.querySelectorAll('.discord-message, .gallery-item, [class*="transition-all"]');
+                
+                elements.forEach(element => {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (elementPosition < windowHeight - 100) {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }
+                });
+            };
+            
+            // Run once on load
+            animateOnScroll();
+            
+            // Run on scroll
+            window.addEventListener('scroll', animateOnScroll);
+        });
+        
+        // Modal functions
+        function openModal(plan) {
+            document.getElementById('selectedPlanText').textContent = 'Selected Plan: ' + plan;
+            document.getElementById('checkoutModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('checkoutModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
