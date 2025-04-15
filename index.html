@@ -832,83 +832,33 @@
 
     <!-- Rest of the HTML content remains the same -->
 
-    <script>
-        // Download functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const downloadBtn = document.getElementById('downloadBtn');
-            const downloadProgress = document.getElementById('downloadProgress');
-            const downloadComplete = document.getElementById('downloadComplete');
-            const downloadPercent = document.getElementById('downloadPercent');
-            const progressBar = document.getElementById('progressBar');
-            
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', function() {
-                    // Show progress bar
-                    downloadProgress.classList.remove('hidden');
-                    downloadComplete.classList.add('hidden');
-                    
-                    // The actual file download URL
-                    const fileUrl = 'https://pixeldrain.com/api/file/B8bGKzuD?download';
-                    
-                    // Create a hidden iframe for the download
-                    const iframe = document.createElement('iframe');
-                    iframe.style.display = 'none';
-                    document.body.appendChild(iframe);
-                    
-                    // Create XMLHttpRequest to track progress
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('GET', fileUrl, true);
-                    xhr.responseType = 'blob';
-                    
-                    // Track progress
-                    xhr.onprogress = function(event) {
-                        if (event.lengthComputable) {
-                            const percentComplete = Math.round((event.loaded / event.total) * 100);
-                            progressBar.style.width = percentComplete + '%';
-                            downloadPercent.textContent = percentComplete + '%';
-                        }
-                    };
-                    
-                    xhr.onload = function() {
-                        if (this.status === 200) {
-                            // Create a download link
-                            const blob = this.response;
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.style.display = 'none';
-                            a.href = url;
-                            a.download = 'OklaLite.zip'; // Set the filename
-                            document.body.appendChild(a);
-                            a.click();
-                            
-                            // Cleanup
-                            window.URL.revokeObjectURL(url);
-                            document.body.removeChild(a);
-                            document.body.removeChild(iframe);
-                            
-                            // Show complete message
-                            downloadProgress.classList.add('hidden');
-                            downloadComplete.classList.remove('hidden');
-                        }
-                    };
-                    
-                    xhr.onerror = function() {
-                        downloadPercent.textContent = 'Error';
-                        progressBar.style.backgroundColor = 'red';
-                        document.body.removeChild(iframe);
-                    };
-                    
-                    // Start the download
-                    xhr.send();
-                    
-                    // Also trigger the iframe download as a fallback
-                    iframe.src = fileUrl;
-                });
-            }
-            
-            // Rest of your existing JavaScript code...
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadComplete = document.getElementById('downloadComplete');
+
+        downloadBtn.addEventListener('click', function () {
+            const fileUrl = 'https://pixeldrain.com/api/file/B8bGKzuD?download';
+
+            // Buat elemen <a> dan trigger klik
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.setAttribute('download', 'OklaLite.zip');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // Tampilkan notifikasi selesai (opsional, karena browser tidak bisa deteksi selesai sebenarnya)
+            setTimeout(() => {
+                downloadComplete.classList.remove('hidden');
+            }, 2000); // Simulasi selesai dalam 2 detik
         });
-    </script>
+    });
+</script>
+
+<!-- FontAwesome CDN for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 
     <!-- Testimonials -->
     <section class="py-20 bg-gray-900">
